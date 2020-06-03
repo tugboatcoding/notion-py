@@ -1,15 +1,19 @@
 import setuptools
 
-try:  # for pip >= 10
-    from pip._internal.req import parse_requirements
-except ImportError:  # for pip <= 9.0.3
-    from pip.req import parse_requirements
+
+def parse_requirements(filename):
+    """Load requirements from requirements.txt"""
+    # See: https://stackoverflow.com/questions/25192794/no-module-named-pip-req
+
+    lines = (line.strip() for line in open(filename))
+    return [line for line in lines if line and not line.startswith("#")]
+
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-reqs = parse_requirements("requirements.txt", session=False)
-install_requires = [str(ir.req) for ir in reqs]
+reqs = parse_requirements("requirements.txt")
+install_requires = reqs
 
 setuptools.setup(
     name="notion",

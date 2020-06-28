@@ -114,13 +114,31 @@ class Collection(Record):
             self._templates = Templates(parent=self)
         return self._templates
 
+    def _get_sorted_schema_items(self):
+        schema = self.get("schema")
+        items = [i for i in self._client._store._values["collection_view"].items()]
+        items.sort(key=lambda x: x[1]["version"], reverse=True)
+        item = items[0]
+        column_headers = [p["property"] for p in item[1]["format"]["table_properties"]]
+        schema_items = [i for i in schema.items()]
+        schema_items.sort(key=lambda x: column_headers.index(x[0]))
+        return schema_items
+
     def get_schema_properties(self):
         """
         Fetch a flattened list of all properties in the collection's schema.
         """
         properties = []
         schema = self.get("schema")
-        for id, item in schema.items():
+        schema_items = schema.items()
+
+        try:
+            schema_items = self._get_sorted_schema_items()
+        except Exception as e:
+            print(e)
+            pass
+
+        for id, item in schema_items:
             prop = {"id": id, "slug": slugify(item["name"])}
             prop.update(item)
             properties.append(prop)

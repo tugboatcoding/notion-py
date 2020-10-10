@@ -1,23 +1,26 @@
 import setuptools
 
 
-def parse_requirements(filename):
-    """Load requirements from requirements.txt"""
-    # See: https://stackoverflow.com/questions/25192794/no-module-named-pip-req
-
-    lines = (line.strip() for line in open(filename))
-    return [line for line in lines if line and not line.startswith("#")]
-
-
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-reqs = parse_requirements("requirements.txt")
-install_requires = reqs
+
+def get_requirements(fname):
+    "Takes requirements from requirements.txt and returns a list."
+    with open(fname) as fp:
+        reqs = list()
+        for lib in fp.read().split("\n"):
+            # Ignore pypi flags and comments
+            if not lib.startswith("-") or lib.startswith("#"):
+                reqs.append(lib.strip())
+        return reqs
+
+
+install_requires = get_requirements("requirements.txt")
 
 setuptools.setup(
     name="notion",
-    version="0.0.25",
+    version="0.0.26",
     author="Jamie Alexandre",
     author_email="jamalex+python@gmail.com",
     description="Unofficial Python API client for Notion.so",
